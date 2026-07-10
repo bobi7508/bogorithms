@@ -64,7 +64,18 @@ function createCodePanel(container) {
     if (activeLine && lineEls[activeLine - 1]) {
       const el = lineEls[activeLine - 1];
       el.classList.add('active');
-      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      // Scroll only this panel's own scrollbar (never the page/modal) — and
+      // only when the line is actually out of view, so we don't fight a
+      // manual scroll/swipe the user is mid-way through.
+      const targetTop = el.offsetTop - container.clientHeight / 2 + el.clientHeight / 2;
+      const visibleTop = container.scrollTop;
+      const visibleBottom = container.scrollTop + container.clientHeight;
+      if (el.offsetTop < visibleTop || el.offsetTop + el.clientHeight > visibleBottom) {
+        // Plain scrollTop assignment (not scrollTo({behavior:'smooth'})) — the
+        // options-object form is unreliable on some mobile browsers; CSS
+        // `scroll-behavior: smooth` on the container handles the animation.
+        container.scrollTop = Math.max(0, targetTop);
+      }
     }
   }
 

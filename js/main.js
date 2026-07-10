@@ -1,5 +1,12 @@
 // UI wiring: grid rendering, category filter, modal + player controls.
 
+const PLAY_ICON_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const PAUSE_ICON_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+
+function setPlayButtonState(playing) {
+  document.getElementById('viz-play').innerHTML = playing ? PAUSE_ICON_SVG : PLAY_ICON_SVG;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   renderAlgoGrid();
   wireCategoryFilter();
@@ -18,7 +25,7 @@ function renderAlgoGrid() {
     card.innerHTML = `
       <div class="algo-card-top">
         <span class="algo-card-cat">${algo.categoryLabel}</span>
-        <span class="algo-card-play">▶</span>
+        <span class="algo-card-play">${PLAY_ICON_SVG}</span>
       </div>
       <h3>${algo.title}</h3>
       <p>${algo.desc}</p>
@@ -60,20 +67,20 @@ function wireModal() {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-  document.getElementById('viz-play').addEventListener('click', (e) => {
+  document.getElementById('viz-play').addEventListener('click', () => {
     if (!currentPlayer) return;
     const playing = currentPlayer.toggle();
-    e.currentTarget.textContent = playing ? '⏸' : '▶';
+    setPlayButtonState(playing);
   });
   document.getElementById('viz-reset').addEventListener('click', () => {
     if (!currentPlayer) return;
     currentPlayer.reset();
-    document.getElementById('viz-play').textContent = '▶';
+    setPlayButtonState(false);
   });
   document.getElementById('viz-step').addEventListener('click', () => {
     if (!currentPlayer) return;
     currentPlayer.pause();
-    document.getElementById('viz-play').textContent = '▶';
+    setPlayButtonState(false);
     currentPlayer.step();
   });
   document.getElementById('viz-speed-range').addEventListener('input', (e) => {
@@ -157,7 +164,7 @@ function openModal(id) {
     },
     onProgress: (i, total) => { progressText.textContent = `${i + 1} / ${total}`; },
   });
-  document.getElementById('viz-play').textContent = '▶';
+  setPlayButtonState(false);
   document.getElementById('viz-speed-range').value = 5;
   currentPlayer.setSpeed(5);
   currentPlayer.goto(0);
