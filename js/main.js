@@ -146,6 +146,13 @@ function openModal(id) {
 
   if (currentPlayer) currentPlayer.destroy();
 
+  // Open the modal (and let layout settle) *before* algo.setup() runs, since
+  // several visualizers size their canvas from the container's clientWidth —
+  // measuring it while the modal is still display:none would read 0 and fall
+  // back to a fixed width, which then gets crushed to fit small screens.
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
   currentAlgoId = id;
   currentLang = 'cpp';
   document.getElementById('code-tab-cpp').classList.add('active');
@@ -168,9 +175,6 @@ function openModal(id) {
   document.getElementById('viz-speed-range').value = 5;
   currentPlayer.setSpeed(5);
   currentPlayer.goto(0);
-
-  document.getElementById('modal-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
